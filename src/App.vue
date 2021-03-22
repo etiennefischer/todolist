@@ -34,6 +34,9 @@ export default {
     ...mapGetters({
       todoItems: 'getTodoItems'
     })
+  },
+  mounted() {
+    this.$store.dispatch('getItems')
   }
 }
 </script>

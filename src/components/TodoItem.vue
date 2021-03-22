@@ -44,10 +44,10 @@ export default {
   computed: {
     formattedDate() {
       return new Intl.DateTimeFormat('fr-FR')
-        .format(this.item.createdAt)
+        .format(new Date(this.item.createdAt))
     },
     isChecked() {
-      return this.item.checkedAt !== null
+      return this.item.checked
     },
     contextualClasses() {
       return {
@@ -61,7 +61,7 @@ export default {
       this.$store.dispatch('setItemChecked', item)
     },
     deleteItem(item) {
-      this.$store.dispatch('deleteItem', item)
+      this.$store.dispatch('deleteItem', item.id)
     }
   }
 }

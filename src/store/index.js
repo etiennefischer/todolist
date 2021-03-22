@@ -1,61 +1,79 @@
 import { createStore } from 'vuex'
+import api from './api'
 
 export default createStore({
   state() {
     return {
-      todoItems: [
-        {
-          id: '1',
-          name: 'Faire un coucou',
-          createdAt: new Date(),
-          checkedAt: new Date()
-        },
-        {
-          id: '2',
-          name: 'Faire un truc',
-          createdAt: new Date(),
-          checkedAt: null
-        },
-        {
-          id: '3',
-          name: 'Faire un truc',
-          createdAt: new Date(),
-          checkedAt: null
-        }
-      ]
+      serverItems: {}
     }
   },
   getters: {
     getTodoItems(state) {
-      return state.todoItems
+      const itemIds = Object.keys(state.serverItems).map(id => id)
+
+      return itemIds.map(id => {
+        const item = state.serverItems[id]
+        return { ...item, id }
+      })
     }
   },
   actions: {
-    setItemChecked(context, item) {
-      context.commit('setItemChecked', item)
+    async getItems(context) {
+      try {
+        const { data } = await api.get('todos.json')
+        context.commit('setItems', data)
+      }
+      catch (error) {
+        console.error(error)
+      }
     },
-    addItem(context, name) {
-      context.commit('addItem', {
+    async setItemChecked(context, item) {
+      try {
+        await api.patch(`/todos/${item.id}.json`, { checked: !item.checked })
+        context.commit('setItemChecked', item.id)
+      }
+      catch (errro) {
+        console.error(error)
+      }
+    },
+    async addItem(context, name) {
+      const item = {
         name,
-        id: '_' + Math.random().toString(36).substr(2, 9),
-        createdAt: new Date(),
-        checkedAt: null
-      })
+        createdAt: new Date().toString(),
+        checked: false
+      }
+
+      try {
+        const { data } = await api.post('todos.json', item)
+        return context.commit('addItem', { id: data.name, item })
+      }
+      catch (error) {
+        console.error(error)
+      }
     },
-    deleteItem(context, item) {
-      context.commit('deleteItem', item)
+    async deleteItem(context, id) {
+      try {
+        await api.delete(`todos/${id}.json`)
+        context.commit('deleteItem', id)
+      }
+      catch (error) {
+        console.error(error)
+      }
     }
   },
   mutations: {
-    setItemChecked(state, item) {
-      const stateItem = state.todoItems.find(todoItem => todoItem.id === item.id)
-      stateItem.checkedAt = stateItem.checkedAt ? null : new Date()
+    setItems(state, items) {
+      state.serverItems = items || {}
     },
-    addItem(state, item) {
-      state.todoItems.push(item)
+    setItemChecked(state, id) {
+      const item = state.serverItems[id]
+      item.checked = !item.checked
     },
-    deleteItem(state, item) {
-      state.todoItems = state.todoItems.filter(i => item.id !== i.id)
+    addItem(state, { id, item }) {
+      state.serverItems[id] = item
+    },
+    deleteItem(state, id) {
+      delete state.serverItems[id]
     }
   }
 })
