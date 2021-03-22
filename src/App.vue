@@ -8,47 +8,24 @@
       <li
         v-for="item in todoItems"
         :key="item.id">
-        <TodoItem :item="item" @onItemChecked="onItemChecked" />
+        <TodoItem :item="item" />
       </li>
     </ul>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import TodoItem from '@/components/TodoItem.vue'
 
 export default {
   components: {
     TodoItem
   },
-  data() {
-    return {
-      todoItems: [
-        {
-          id: '1',
-          name: 'Faire un truc',
-          createdAt: new Date(),
-          checkedAt: new Date()
-        },
-        {
-          id: '2',
-          name: 'Faire un truc',
-          createdAt: new Date(),
-          checkedAt: null
-        },
-        {
-          id: '3',
-          name: 'Faire un truc',
-          createdAt: new Date(),
-          checkedAt: null
-        }
-      ]
-    }
-  },
-  methods: {
-    onItemChecked(item) {
-      item.checkedAt = item.checkedAt ? null : new Date()
-    }
+  computed: {
+    ...mapGetters({
+      todoItems: 'getTodoItems'
+    })
   }
 }
 </script>

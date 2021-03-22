@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     onItemChecked(item) {
-      this.$emit('onItemChecked', item)
+      this.$store.dispatch('setItemChecked', item)
     }
   }
 }
